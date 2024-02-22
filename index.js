@@ -11,7 +11,8 @@ const {
     getFilmsByUsername,
     deleteFilm,
     updateComments,
-    getComments
+    getComments,
+    deleteComment
 } = require('./MongoDatabase'); // Assuming you've renamed MongoDatabase.mjs to MongoDatabase.js
 
 const app = express();
@@ -95,54 +96,51 @@ app.get('/', async (req, res) => {
         res.redirect('/login');
     } else { // If the user is logged in, show the home page
         let allFilms = await getFilms()
-        res.render('dashboard', { films: allFilms });
+        res.render('dashboard', { films: allFilms , user: req.session.username});
     }
 });
 
 app.post('/comment/:filmName', (req, res) => {
     const filmName = req.params.filmName;
     const comment = req.body.comment;
-    const film = getFilmByName(filmName);
-    let CommentUuid = generateUniqueId();
-    let commentData = {CommentUuid: CommentUuid, username: req.session.username, comment};
-    film.comments.push(commentData);
-    updateComments(uuid, film);
+
+    updateComments(filmName, comment, req.session.username);
     res.redirect('/');
 });
 
-app.post('/replyComment/:commentid/:uuid', (req, res) => {
-    console.log(commentid, uuid, req.body.reply)
-    const commentid = req.params.commentid;
-    const uuid = req.params.uuid;
-    const reply = req.body.reply;
-    const film = getFilmByUuid(uuid);
-    for (let i = 0; i < film.comments.length; i++){
-        if (film.comments[i].CommentUuid === commentid){
-            if (!film.comments[i].replies){
-                film.comments[i].replies = [];
-                film.comments[i].replies.push({replyUuid: generateUniqueId(), username: req.session.username, reply});
-            }
-            else{
-                film.comments[i].replies.push({replyUuid: generateUniqueId(), username: req.session.username, reply});
-            }
-        }
-        break;
-    }
-    updateComments(uuid, film);
+app.post('/replyComment/:filmName', (req, res) => {
+    const { parentCommentId, reply } = req.body;
+    const filmName = req.params.filmName;
+
+    updateComments(filmName, reply, req.session.username, parentCommentId);
     res.redirect('/');
 });
 
-app.get('/myProfile', (req, res) => {
+app.get('/getComments/:filmName/:skip/:limit', async (req, res) => {
+    const { filmName, skip, limit } = req.params;
+    const comments = await getComments(filmName, parseInt(skip), parseInt(limit));
+    res.json(comments);
+});
+
+app.get('/deleteComment/:filmName/:commentId', async (req, res) => {
+    const { filmName, commentId } = req.params;
+    await deleteComment(filmName, commentId);
+    res.redirect('/');
+});
+
+
+app.get('/myProfile', async (req, res) => {
     if (!req.session.loggedIn) { // If the user is not logged in, redirect to login
         res.redirect('/login');
     } else { // If the user is logged in, show the home page
-        res.render('myProfile', {username: req.session.username, myFilms: getFilmsByUsername(req.session.username)});
+        let myFilms = await getFilmsByUsername(req.session.username);
+        res.render('myProfile', {username: req.session.username, myFilms: myFilms});
     }
 });
 
-app.post('/deleteFilm/:filmName', (req, res) => {
+app.post('/deleteFilm/:filmName', async (req, res) => {
     const filmName = req.params.filmName;
-    deleteFilm(req.session.username, filmName);
+    await deleteFilm(req.session.username, filmName);
     res.redirect('/'); // Redirect back to the profile page after deletion
 });
 
@@ -169,6 +167,10 @@ app.get('/film/:filmName', async (req, res) => {
 
 app.get('/user/:username', async (req, res) => {
     const username = req.params.username;
+    if (username === req.session.username) {
+        res.redirect('/myProfile');
+        return;
+    }
     const user = await getUserData(username);
     const userFilms = await getFilmsByUsername(username);
     res.render('profile', { username: user.username , films: userFilms});
