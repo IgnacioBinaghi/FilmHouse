@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-black text-white font-mono">
+    <nav class="p-4">
+        <div class="container mx-auto flex justify-between">
+            <div class="font-semibold text-lg"><a href="/">FilmHaus</a></div>
+            <ul class="flex">
+                <li class="mx-3 hover:text-gray-500"><a href="/uploadFilm">Upload Film</a></li>
+                <li class="mx-3 hover:text-gray-500"><a href="/logout">Log Out</a></li>
+            </ul>
+        </div>
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-6">Welcome Back {{username}},</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {{#each myFilms as |myFilm|}}
+                <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
+                    <h2 class="text-lg font-semibold mb-2">{{myFilm.filmName}}</h2>
+                    <form action="/deleteFilm/{{myFilm.uuid}}" method="POST">
+                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Delete Film</button>
+                    </form>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+</body>
+</html>

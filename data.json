@@ -1,0 +1,50 @@
+{
+  "ignacio": {
+    "username": "ignacio",
+    "email": "binaghiignacio@gmail.com",
+    "password": "1234",
+    "userData": {},
+    "films": {
+      "id-4912yu92a-1708560432660": {
+        "filmLink": "Rl_Xhvgkxrk",
+        "filmName": "Dune Popcorn Bucket - SNL",
+        "bio": "IDEK",
+        "totalTimeSpent": "5 minutes",
+        "numberOfPeopleInvolved": "8",
+        "director": "ur mom",
+        "productionDesigner": "",
+        "dp": "",
+        "soundDesigner": "",
+        "costumeDesigner": "",
+        "editorialDepartment": "",
+        "actors": "",
+        "equipmentUsed": "",
+        "optionalDocuments": "",
+        "comments": [
+          {
+            "username": "ignacio",
+            "comment": "This sux lowk"
+          },
+          {
+            "username": "ignacio",
+            "comment": "lmaooo"
+          },
+          {
+            "comment": "hey"
+          }
+        ]
+      }
+    },
+    "comments": {},
+    "friends": {}
+  },
+  "ava": {
+    "username": "ava",
+    "email": "binaghiignacio@gmail.com",
+    "password": "1234",
+    "userData": {},
+    "films": {},
+    "comments": {},
+    "friends": {}
+  }
+}
