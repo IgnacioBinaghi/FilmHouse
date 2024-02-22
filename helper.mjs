@@ -92,7 +92,6 @@ function getUserFilms(username){
         currFilms[Object.keys(currFilms)[u]]['uuid'] = Object.keys(currFilms)[u]
         films.push(currFilms[Object.keys(currFilms)[u]]);
     }
-    console.log(films);
     return films;
 }
 
@@ -126,7 +125,6 @@ function updateComments(uuid, filmData){
 
 function getComments(uuid){
     const db = getFilmByUuid(uuid);
-    console.log(db.comments);
     return db.comments;
 }
 

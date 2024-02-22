@@ -23,27 +23,24 @@ app.get('/register', (req, res) => { // GET /register
     res.render('register', {});
 });
 
-app.post('/register', async (req, res) => {
+app.post('/register', (req, res) => {
     const { email, username, password } = req.body;
     if (username === '' || password === '' || email === '') {
         return res.render('register', { error: 'Email, username, and password are required' });
     }
-    try {
-        const user = await getDBByUsername(username);
-        if (user) {
-            res.render('register', { error: 'Username already taken' });
-        } else {
-            addToDB(email, username, password);
-            req.session.loggedIn = true;
-            req.session.username = username;
-            res.redirect('/');
-        }
-    } catch (err) {
-        res.status(500).send('Server error');
+    const user = getDBByUsername(username);
+    if (user) {
+        return res.render('register', { error: 'Username already taken' });
+    } else {
+        addToDB(email, username, password);
+        req.session.loggedIn = true;
+        req.session.username = username;
+        res.redirect('/');
     }
+    res.redirect('/');
 });
 
-app.post('/login', async (req, res) => {
+app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
     if (username === '' || password === '') {
@@ -52,7 +49,7 @@ app.post('/login', async (req, res) => {
 
 
     try {
-        const user = await getDBByUsername(username);
+        const user = getDBByUsername(username);
         if (user && password === user.password) {
             req.session.loggedIn = true;
             req.session.username = username;
@@ -84,7 +81,15 @@ app.get('/', (req, res) => {
         res.redirect('/login');
     } else { // If the user is logged in, show the home page
         let allFilms = getFilms()
-        res.render('dashboard', {films : allFilms});
+        let sortedCommentsByReplies = allFilms.map(film => {
+            let comments = getComments(film.uuid);
+            return {
+                ...film,
+                comments: comments.sort((a, b) => (a.replies?.length || 0) + (b.replies?.length || 0))
+            };
+        });
+        console.log(sortedCommentsByReplies[0].comments);
+        res.render('dashboard', { films: allFilms, comments : sortedCommentsByReplies });
     }
 });
 
@@ -92,7 +97,31 @@ app.post('/comment/:uuid', (req, res) => {
     const uuid = req.params.uuid;
     const comment = req.body.comment;
     const film = getFilmByUuid(uuid);
-    film.comments.push({username: req.session.username, comment: comment});
+    let CommentUuid = generateUniqueId();
+    let commentData = {CommentUuid: CommentUuid, username: req.session.username, comment};
+    film.comments.push(commentData);
+    updateComments(uuid, film);
+    res.redirect('/');
+});
+
+app.post('/replyComment/:commentid/:uuid', (req, res) => {
+    console.log(commentid, uuid, req.body.reply)
+    const commentid = req.params.commentid;
+    const uuid = req.params.uuid;
+    const reply = req.body.reply;
+    const film = getFilmByUuid(uuid);
+    for (let i = 0; i < film.comments.length; i++){
+        if (film.comments[i].CommentUuid === commentid){
+            if (!film.comments[i].replies){
+                film.comments[i].replies = [];
+                film.comments[i].replies.push({replyUuid: generateUniqueId(), username: req.session.username, reply});
+            }
+            else{
+                film.comments[i].replies.push({replyUuid: generateUniqueId(), username: req.session.username, reply});
+            }
+        }
+        break;
+    }
     updateComments(uuid, film);
     res.redirect('/');
 });

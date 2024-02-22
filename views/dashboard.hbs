@@ -24,7 +24,7 @@
                     <h1>Posted by {{film.username}}</h1>
                     <h2 class="text-xl font-bold mb-2"><a href="/{{film.uuid}}">{{film.filmName}}</a></h2>
                     <iframe class="w-full h-64" src="https://www.youtube.com/embed/{{film.filmLink}}?si=75_1hpuIvAefkLVF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    <div class="mt-4">
+                    <div class="mt-4 mb-5">
                         <p><strong>Bio:</strong> {{film.bio}}</p>
                         <p><strong>Total Time Spent:</strong> {{film.totalTimeSpent}}</p>
                         <p><strong>Number of People Involved:</strong> {{film.numberOfPeopleInvolved}}</p>
@@ -38,13 +38,22 @@
                         <p><strong>Equipment Used:</strong> {{film.equipmentUsed}}</p>
                     </div>
                     {{#each comments as |comment|}}
-                        <div class="mt-4">
-                            <p><strong>Comment:</strong> {{comment.username}}</p>
-                            <p><strong>Posted by:</strong> {{comment.comment}}</p>
+                        <div class="bg-gray-700 rounded-lg p-4 mb-4" data-comment-id="{{comment.CommentUuid}}">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-white">{{comment.username}}</h3>
+                            <button type="button" onclick="setupReplyForm('{{comment.CommentUuid}}', '{{film.uuid}}')" class="text-sm text-gray-300 hover:text-gray-400">Reply</button>
+                            </div>
+                            <p class="text-gray-200 mt-2">{{comment.comment}}</p>
                         </div>
+                        {{#each comment.replies as |reply|}}
+                            <div class="bg-gray-600 rounded-lg p-4 ml-4 mb-4">
+                                <h3 class="font-bold text-white">{{reply.username}}</h3>
+                                <p class="text-gray-200 mt-2">{{reply.reply}}</p>
+                            </div>
+                        {{/each}}
                     {{/each}}
                 </div>
-                <form action="/comment/{{film.uuid}}" method="POST">
+                <form id = "commentForm" action="/comment/{{film.uuid}}" method="POST">
                     <input type="hidden" name="filmId" value="{{film.uuid}}">
                     <input type="text" name="comment" placeholder="Comment" class="py-2 px-3 mb-3 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-white text-white">
                     <input type="submit" value="Add Comment" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline">
@@ -52,5 +61,31 @@
             </div>
         </div>
     {{/each}}
+
+    <script>
+    function setupReplyForm(commentId, uuid) {
+        // Check if a reply form already exists and remove it
+        var existingReplyForm = document.getElementById('replyForm');
+        if (existingReplyForm) {
+            existingReplyForm.remove();
+        }
+
+        // Create a new reply form
+        var form = document.createElement('form');
+        form.id = 'replyForm';
+        form.action = '/replyComment/' + commentId+'/'+uuid; // Modify as needed for your URL structure
+        form.method = 'POST';
+        form.innerHTML = `
+            <input type="hidden" name="commentId" value="${commentId}">
+            <input type="text" name="reply" placeholder="Your reply" class="py-2 px-3 mb-3 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-white text-white">
+            <input type="submit" value="Reply" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        `;
+
+        // Insert the form below the comment
+        var commentDiv = document.querySelector('[data-comment-id="' + commentId + '"]');
+        commentDiv.parentNode.insertBefore(form, commentDiv.nextSibling);
+    }
+    </script>
+
 </body>
 </html>
