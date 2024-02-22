@@ -20,6 +20,15 @@
     <div class="flex justify-center">
         <div class="w-2/3">
             <h1 class="text-lg font-bold mb-4">{{film.filmName}}</h1>
+            <div class="flex items-center space-x-4">
+                <a href="/vote/{{film.filmName}}/up" class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300">
+                    Upvote
+                </a>
+                <h1 class="text-xl font-bold">{{film.votes}}</h1>
+                <a href="/vote/{{film.filmName}}/down" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-300">
+                    Downvote
+                </a>
+            </div>
             <iframe class="w-full h-3/4 mb-4" src="https://www.youtube.com/embed/{{film.filmLink}}?si=75_1hpuIvAefkLVF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             <p><strong>Bio:</strong> {{film.bio}}</p>
             <p><strong>Total Time Spent:</strong> {{film.totalTimeSpent}}</p>
@@ -33,8 +42,46 @@
             <p><strong>Actors:</strong> {{film.actors}}</p>
             <p><strong>Equipment Used:</strong> {{film.equipmentUsed}}</p>
             <div class="mt-10"><a href="/user/{{film.user}}" class="hover:text-gray-400">More about {{film.user}}</a></div>
-            <div> Stuff ab poster </div>
+            {{#each comments as |comment|}}
+                        <div class="bg-gray-700 rounded-lg p-4 mb-4" data-comment-id="{{comment._id}}">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-white">{{comment.postedBy}}</h3>
+                                <h3 class="text-white">{{comment.commentedAt}}</h3>
+                            <button type="button" onclick="setupReplyForm('{{comment._id}}')" class="text-sm text-gray-300 hover:text-gray-400">Reply</button>
+                            </div>
+                            <p class="text-gray-200 mt-2">{{comment.text}}</p>
+                            {{#each comment.replies as |reply|}}
+                                <div class="reply ml-4 bg-gray-700 rounded-lg p-4 mb-4">
+                                    <div class="flex justify-between items-center">
+                                        <h3 class="font-bold text-white">{{reply.postedBy}}</h3>
+                                        <h3 class="text-white">{{reply.repliedAt}}</h3>
+                                    </div>
+                                    <p class="text-gray-200 mt-2">{{reply.text}}</p>
+                                </div>
+                            {{/each}}
+                            <form id="reply-form-{{comment._id}}" class="reply-form mt-5" style="display:none;" action="/replyComment/{{film.filmName}}" method="POST">
+                                <input type="hidden" name="parentCommentId" value="{{comment._id}}">
+                                <input type="text" name="reply" class="py-2 px-3 mb-3 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-white text-white">
+                                <input type="submit" value="Reply" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            </form>
+                        </div>
+                    {{/each}}
+                    <form class="ml-5" id = "commentForm" action="/comment/{{film.filmName}}" method="POST">
+                    <input type="text" name="comment" placeholder="Comment" class="py-2 px-3 mb-3 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-white text-white">
+                    <input type="submit" value="Add Comment" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                </form>
         </div>
     </div>
+    <script>
+        function setupReplyForm(commentId) {
+            var formId = 'reply-form-' + commentId;
+            var replyForm = document.getElementById(formId);
+            if (replyForm.style.display === "none") {
+                replyForm.style.display = "block";
+            } else {
+                replyForm.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>

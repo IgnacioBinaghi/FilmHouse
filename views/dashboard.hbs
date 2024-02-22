@@ -23,6 +23,15 @@
                 <div class="p-4">
                     <h1>Posted by <a class="hover:text-gray-400" href="/user/{{film.user}}">{{film.user}}</a></h1>
                     <h2 class="text-xl font-bold mb-2 hover:text-gray-400"><a href="/film/{{film.filmName}}">{{film.filmName}}</a></h2>
+                    <div class="flex items-center space-x-4">
+                        <a href="/vote/{{film.filmName}}/up" class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300">
+                            Upvote
+                        </a>
+                        <h1 class="text-xl font-bold">{{film.votes}}</h1>
+                        <a href="/vote/{{film.filmName}}/down" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-300">
+                            Downvote
+                        </a>
+                    </div>
                     <iframe class="w-full h-64" src="https://www.youtube.com/embed/{{film.filmLink}}?si=75_1hpuIvAefkLVF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     <div class="mt-4 mb-5">
                         <p><strong>Bio:</strong> {{film.bio}}</p>
@@ -49,8 +58,7 @@
                                 <div class="reply ml-4 bg-gray-700 rounded-lg p-4 mb-4">
                                     <div class="flex justify-between items-center">
                                         <h3 class="font-bold text-white">{{reply.postedBy}}</h3>
-                                        <h3 class="text-white">{{reply.commentedAt}}</h3>
-                                        <button type="button" onclick="setupReplyForm('{{comment._id}}')" class="text-sm text-gray-300 hover:text-gray-400">Reply</button>
+                                        <h3 class="text-white items-center">{{reply.repliedAt}}</h3>
                                     </div>
                                     <p class="text-gray-200 mt-2">{{reply.text}}</p>
                                 </div>

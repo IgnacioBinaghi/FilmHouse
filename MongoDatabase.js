@@ -41,8 +41,35 @@ async function addFilmToDB(user, filmLink, filmName, bio, totalTimeSpent, number
   const database = client.db('userData');
   const filmData = database.collection('filmData');
 
-  let currFilmData = { user, filmLink, filmName, bio, totalTimeSpent, numberOfPeopleInvolved, director, productionDesigner, dp, soundDesigner, costumeDesigner, editorialDepartment, actors, equipmentUsed, optionalDocuments, comments: [] }
+  let currFilmData = { user, votes: 0, voters: {}, filmLink, filmName, bio, totalTimeSpent, numberOfPeopleInvolved, director, productionDesigner, dp, soundDesigner, costumeDesigner, editorialDepartment, actors, equipmentUsed, optionalDocuments, comments: [] }
   await filmData.insertOne(currFilmData);
+  await client.close();
+}
+
+async function changeVotes(filmName, vote, user) {
+  const client = connectToDatabase();
+  const database = client.db('userData');
+  const filmData = database.collection('filmData');
+
+  let currFilm = await filmData.findOne({ filmName });
+
+  if (currFilm.voters[user] === vote){
+    await client.close();
+    return;
+  } else if (currFilm.voters[user] !== vote){ // make it so when someone downvotes they can only change to upvote and vice versa but cant vote twice
+    if (currFilm.voters[user] === 'up'){
+      currFilm.votes--;
+    }
+    else if (currFilm.voters[user] === 'down'){
+      currFilm.votes++;
+    }
+
+  }
+  currFilm.voters[user] = vote;
+  await filmData.updateOne(
+    { 'filmName': filmName },
+    { $set: { 'votes': currFilm.votes, 'voters': currFilm.voters } }
+  );
   await client.close();
 }
 
@@ -129,4 +156,4 @@ async function deleteComment(filmName, commentId) {
   await client.close();
 }
 
-module.exports = { addUserToDatabase, getUserData, getFilms, addFilmToDB, getFilmByName, getFilmsByUsername, deleteFilm, updateComments, getComments, deleteComment };
+module.exports = { addUserToDatabase, getUserData, getFilms, addFilmToDB, getFilmByName, getFilmsByUsername, deleteFilm, updateComments, getComments, deleteComment, changeVotes };

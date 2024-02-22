@@ -12,7 +12,8 @@ const {
     deleteFilm,
     updateComments,
     getComments,
-    deleteComment
+    deleteComment,
+    changeVotes
 } = require('./MongoDatabase'); // Assuming you've renamed MongoDatabase.mjs to MongoDatabase.js
 
 const app = express();
@@ -100,15 +101,41 @@ app.get('/', async (req, res) => {
     }
 });
 
+app.get('/vote/:filmName/:voteType', async (req, res) => {
+    const filmName = req.params.filmName;
+    const film = await getFilmByName(filmName);
+    
+    if (req.params.voteType === 'up') {
+        await changeVotes(filmName, 'up');
+    }
+    else{
+        await changeVotes(filmName, 'down');
+    }
+
+    res.redirect('/');
+});
+
 app.post('/comment/:filmName', (req, res) => {
     const filmName = req.params.filmName;
     const comment = req.body.comment;
 
     updateComments(filmName, comment, req.session.username);
+
+    // get current page and redirect accordingly
+    // if in /film/:filmName, redirect to /film/:filmName
+    // else redirect to /
+    if (req.headers.referer) {
+        const referer = req.headers.referer.split('/');
+        if (referer[3] === 'film') {
+            res.redirect(`/film/${filmName}`);
+            return;
+        }
+    }
     res.redirect('/');
 });
 
 app.post('/replyComment/:filmName', (req, res) => {
+    console.log(req.body);
     const { parentCommentId, reply } = req.body;
     const filmName = req.params.filmName;
 
@@ -162,7 +189,8 @@ app.post('/uploadFilm', (req, res) => {
 app.get('/film/:filmName', async (req, res) => {
     const filmName = req.params.filmName;
     const film = await getFilmByName(filmName);
-    res.render('film', { film: film });
+    const comments = await getComments(filmName, 0, 10);
+    res.render('film', { film: film, comments: comments});
 });
 
 app.get('/user/:username', async (req, res) => {
