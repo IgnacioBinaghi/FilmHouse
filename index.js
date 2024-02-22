@@ -1,6 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
+const bodyParser = require('body-parser');
 const {
     addUserToDatabase,
     getUserData,
@@ -22,7 +23,8 @@ const sessionOptions = {
     resave: false
 };
 app.use(session(sessionOptions));
-app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.get('/register', (req, res) => { // GET /register
