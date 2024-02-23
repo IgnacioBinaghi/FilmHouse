@@ -22,6 +22,7 @@
             {{#each films as |film|}}
                 <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
                     <h2 class="text-lg font-semibold mb-2"><a href="/film/{{film.filmName}}">{{film.filmName}}</a></h2>
+                    <h2>Reactions: {{myFilm.votes}}</h2>
                 </div>
             {{/each}}
         </div>

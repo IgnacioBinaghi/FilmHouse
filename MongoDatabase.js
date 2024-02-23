@@ -12,7 +12,7 @@ async function addUserToDatabase(email, username, password) {
   const database = client.db('userData');
   const users = database.collection('users');
 
-  await users.insertOne({ 'username': username, 'email': email, password: password, userData: {}, friends: {} });
+  await users.insertOne({ 'username': username, 'email': email, password: password, userData: {}, friends: {}, profileViews: 0});
   await client.close();
 };
 
@@ -53,17 +53,31 @@ async function changeVotes(filmName, vote, user) {
 
   let currFilm = await filmData.findOne({ filmName });
 
+  if (user && !currFilm.voters[user]){
+    currFilm.voters[user] = vote;
+    currFilm.votes++;
+    await filmData.updateOne(
+      { 'filmName': filmName },
+      { $set: { 'votes': currFilm.votes, 'voters': currFilm.voters } }
+    );
+    await client.close();
+    return;
+  }
+  else if (!user){
+    await client.close();
+    return;
+  }
+
   if (currFilm.voters[user] === vote){
     await client.close();
     return;
   } else if (currFilm.voters[user] !== vote){ // make it so when someone downvotes they can only change to upvote and vice versa but cant vote twice
-    if (currFilm.voters[user] === 'up'){
-      currFilm.votes--;
-    }
-    else if (currFilm.voters[user] === 'down'){
+    if (vote === 'up' && currFilm.voters[user] === 'down'){
       currFilm.votes++;
     }
-
+    else if (vote === 'down' && currFilm.voters[user] === 'up'){
+      currFilm.votes--;
+    }
   }
   currFilm.voters[user] = vote;
   await filmData.updateOne(
@@ -156,4 +170,23 @@ async function deleteComment(filmName, commentId) {
   await client.close();
 }
 
-module.exports = { addUserToDatabase, getUserData, getFilms, addFilmToDB, getFilmByName, getFilmsByUsername, deleteFilm, updateComments, getComments, deleteComment, changeVotes };
+async function addProfileView(user){
+  const client = await connectToDatabase();
+  const database = client.db('userData');
+  const users = database.collection('users');
+
+
+  //let newProfileViews = getUserData(user).profileViews++;
+  let userViews = (await getUserData(user)).profileViews;
+
+  let newProfileViews = userViews + 1;
+
+  await users.updateOne(
+  { 'username': user },
+  { $inc: { 'profileViews': 1 } }
+);
+  await client.close();
+}
+
+module.exports = { addUserToDatabase, getUserData, getFilms, addFilmToDB, getFilmByName, getFilmsByUsername,
+  deleteFilm, updateComments, getComments, deleteComment, changeVotes, addProfileView };

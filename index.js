@@ -13,7 +13,8 @@ const {
     updateComments,
     getComments,
     deleteComment,
-    changeVotes
+    changeVotes,
+    addProfileView
 } = require('./MongoDatabase'); // Assuming you've renamed MongoDatabase.mjs to MongoDatabase.js
 
 const app = express();
@@ -97,7 +98,15 @@ app.get('/', async (req, res) => {
         res.redirect('/login');
     } else { // If the user is logged in, show the home page
         let allFilms = await getFilms()
-        res.render('dashboard', { films: allFilms , user: req.session.username});
+        const allFilmsFiltered = allFilms.map(film => {
+            return Object.fromEntries(Object.entries(film).filter(([key, value]) => {
+                if (key === 'comments') {
+                    return true;
+                }
+                return value !== '';
+            }));
+        });
+        res.render('dashboard', { films: allFilmsFiltered , user: req.session.username});
     }
 });
 
@@ -106,12 +115,19 @@ app.get('/vote/:filmName/:voteType', async (req, res) => {
     const film = await getFilmByName(filmName);
     
     if (req.params.voteType === 'up') {
-        await changeVotes(filmName, 'up');
+        await changeVotes(filmName, 'up', req.session.username);
     }
     else{
-        await changeVotes(filmName, 'down');
+        await changeVotes(filmName, 'down', req.session.username);
     }
 
+    if (req.headers.referer) {
+        const referer = req.headers.referer.split('/');
+        if (referer[3] === 'film') {
+            res.redirect(`/film/${filmName}`);
+            return;
+        }
+    }
     res.redirect('/');
 });
 
@@ -161,7 +177,8 @@ app.get('/myProfile', async (req, res) => {
         res.redirect('/login');
     } else { // If the user is logged in, show the home page
         let myFilms = await getFilmsByUsername(req.session.username);
-        res.render('myProfile', {username: req.session.username, myFilms: myFilms});
+        let profileViews = await getUserData(req.session.username);
+        res.render('myProfile', {username: req.session.username, myFilms: myFilms, profileViews: profileViews.profileViews.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")});
     }
 });
 
@@ -190,7 +207,14 @@ app.get('/film/:filmName', async (req, res) => {
     const filmName = req.params.filmName;
     const film = await getFilmByName(filmName);
     const comments = await getComments(filmName, 0, 10);
-    res.render('film', { film: film, comments: comments});
+    // filtering film object to make sure only items in film with data are displayed, with the exception of comments
+    const filteredFilm = Object.fromEntries(Object.entries(film).filter(([key, value]) => {
+        if (key === 'comments') {
+            return true;
+        }
+        return value !== '';
+    }));
+    res.render('film', { film: filteredFilm, comments: comments});
 });
 
 app.get('/user/:username', async (req, res) => {
@@ -201,6 +225,9 @@ app.get('/user/:username', async (req, res) => {
     }
     const user = await getUserData(username);
     const userFilms = await getFilmsByUsername(username);
+
+    addProfileView(username);
+
     res.render('profile', { username: user.username , films: userFilms});
 });
 
