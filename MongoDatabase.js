@@ -73,10 +73,10 @@ async function changeVotes(filmName, vote, user) {
     return;
   } else if (currFilm.voters[user] !== vote){ // make it so when someone downvotes they can only change to upvote and vice versa but cant vote twice
     if (vote === 'up' && currFilm.voters[user] === 'down'){
-      currFilm.votes++;
+      currFilm.votes+=2;
     }
     else if (vote === 'down' && currFilm.voters[user] === 'up'){
-      currFilm.votes--;
+      currFilm.votes-=2;
     }
   }
   currFilm.voters[user] = vote;
