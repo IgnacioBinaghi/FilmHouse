@@ -188,5 +188,7 @@ async function addProfileView(user){
   await client.close();
 }
 
+
+
 module.exports = { addUserToDatabase, getUserData, getFilms, addFilmToDB, getFilmByName, getFilmsByUsername,
   deleteFilm, updateComments, getComments, deleteComment, changeVotes, addProfileView };
