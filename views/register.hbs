@@ -6,17 +6,28 @@
     <title>Register</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-black text-white font-mono">
+<body class="text-white font-mono" style="background-color: #131c28;">
     <div class="flex justify-center items-center h-screen">
         <form action="/register" method="POST" class="bg-black border-sm border-white rounded px-8 pt-6 pb-8 mb-4">
             <div class="mb-4">
-                <input class="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:border-white" type="email" name="email" placeholder="Email">
+                <input class="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:border-white" 
+                       type="email" 
+                       name="email" 
+                       placeholder="Email"
+                       {{#if email}}value="{{email}}"{{/if}}>
             </div>
             <div class="mb-4">
-                <input class="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:border-white" type="text" name="username" placeholder="Username">
+                <input class="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:border-white" 
+                       type="text" 
+                       name="username" 
+                       placeholder="Username"
+                       {{#if username}}value="{{username}}"{{/if}}>
             </div>
             <div class="mb-6">
-                <input class="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-white mb-3 leading-tight focus:outline-none focus:border-white" type="password" name="password" placeholder="Password">
+                <input class="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-white mb-3 leading-tight focus:outline-none focus:border-white" 
+                       type="password" 
+                       name="password" 
+                       placeholder="Password">
             </div>
             <div class="flex items-center justify-between">
                 <button class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
@@ -28,7 +39,6 @@
                 <p class="text-red-500 text-xs italic">{{error}}</p>
             {{/if}}
         </form>
-        
     </div>
 </body>
 </html>

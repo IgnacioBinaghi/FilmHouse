@@ -189,6 +189,19 @@ async function addProfileView(user){
 }
 
 
+async function checkIfUser(username){
+  const client = connectToDatabase();
+  const database = client.db('userData');
+  const users = database.collection('users');
+
+  let user = await users.findOne({ username}); // account
+
+  if (user){
+    return true;
+  }
+  return false;
+}
+
 
 module.exports = { addUserToDatabase, getUserData, getFilms, addFilmToDB, getFilmByName, getFilmsByUsername,
   deleteFilm, updateComments, getComments, deleteComment, changeVotes, addProfileView };

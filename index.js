@@ -17,6 +17,8 @@ const {
     addProfileView
 } = require('./MongoDatabase'); // Assuming you've renamed MongoDatabase.mjs to MongoDatabase.js
 
+const { sendEmail } = require('./sendEmail')
+
 const app = express();
 app.set('view engine', 'hbs');
 
@@ -35,6 +37,15 @@ app.get('/register', (req, res) => { // GET /register
         res.redirect('/');
     }
     res.render('register', {});
+});
+
+app.get('/register/:email/:username', (req, res) => { // GET /register
+    if (req.session.loggedIn) {
+        res.redirect('/');
+    }
+    const email = req.params.email;
+    const username = req.params.username;
+    res.render('register', {email, username});
 });
 
 app.post('/register', async (req, res) => {
@@ -202,6 +213,14 @@ app.post('/uploadFilm', (req, res) => {
     addFilmToDB(req.session.username, filmLink.slice(32, ), filmName, bio, totalTimeSpent,  numberOfPeopleInvolved, director, productionDesigner, dp, soundDesigner, costumeDesigner, editorialDepartment, actors, equipmentUsed, optionalDocuments);
     res.redirect('/');
 });
+
+app.get('/newAccount', async (req, res) => { // to be implemented in the future when tagging new people
+    const { email, username } = req.query;
+    console.log(email, username);
+    await sendEmail(email, `http://localhost:3000/register/${email}/${username}`);
+    res.redirect('/');
+});
+
 
 app.get('/film/:filmName', async (req, res) => {
     const filmName = req.params.filmName;
