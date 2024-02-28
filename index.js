@@ -21,6 +21,8 @@ const { sendEmail } = require('./sendEmail');
 
 const app = express();
 app.set('view engine', 'hbs');
+app.use("/public", express.static('public')); 
+app.use(express.static('public'));
 
 const sessionOptions = {
     secret: 'super secret stuff',
@@ -102,11 +104,16 @@ app.get('/login', (req, res) => { // GET /login
 
 app.get('/logout', (req, res) => { // GET /logout
     req.session.destroy(); // Destroy the session
-    res.redirect('/login');
+    res.redirect('/'); // go back to the home page
 });
 
 
 app.get('/', async (req, res) => {
+    let loggedIn = false
+    if (req.session.loggedIn) {
+        loggedIn = true;
+    }
+
         let allFilms = await getFilms()
         let constributors = [];
         let bio = '';
@@ -126,7 +133,7 @@ app.get('/', async (req, res) => {
                 return value !== '';
             }));
         });
-        res.render('dashboard', { films: allFilmsFiltered, user: req.session.username, contributors: constributors, bio: bio});
+        res.render('dashboard', { films: allFilmsFiltered, user: req.session.username, contributors: constributors, bio: bio, loggedIn: loggedIn});
 });
 
 app.get('/vote/:filmName/:voteType', async (req, res) => {
@@ -275,6 +282,10 @@ app.get('/newAccount', async (req, res) => { // to be implemented in the future 
 
 
 app.get('/film/:filmName', async (req, res) => {
+    let loggedIn = false
+    if (req.session.loggedIn) {
+        loggedIn = true;
+    }
     const filmName = req.params.filmName;
     const film = await getFilmByName(filmName);
     const comments = await getComments(filmName, 0, 10);
@@ -293,10 +304,14 @@ app.get('/film/:filmName', async (req, res) => {
         }
         return value !== '';
     }));
-    res.render('film', { film: filteredFilm, comments: comments, bio: bio});
+    res.render('film', { film: filteredFilm, comments: comments, bio: bio, loggedIn: loggedIn});
 });
 
 app.get('/user/:username', async (req, res) => {
+    let loggedIn = false;
+    if (req.session.loggedIn) {
+        loggedIn = true;
+    }
     const username = req.params.username;
     if (username === req.session.username) {
         res.redirect('/myProfile');
@@ -307,7 +322,7 @@ app.get('/user/:username', async (req, res) => {
 
     addProfileView(username);
 
-    res.render('profile', { username: user.username , films: userFilms});
+    res.render('profile', { username: user.username , films: userFilms, loggedIn: loggedIn});
 });
 
 

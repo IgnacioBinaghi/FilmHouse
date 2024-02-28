@@ -11,9 +11,14 @@
         <div class="container mx-auto flex justify-between">
             <div class="font-semibold text-lg"><a href="/">FilmHouse</a></div>
             <ul class="flex">
+                {{#if loggedIn}}
                 <li class="mx-3 hover:text-gray-500"><a href="/uploadFilm">Upload Film</a></li>
                 <li class="mx-3 hover:text-gray-500"><a href="/myProfile">My Profile</a></li>
                 <li class="mx-3 hover:text-gray-500"><a href="/logout">Log Out</a></li>
+                {{else}}
+                <li class="mx-3 hover:text-gray-500"><a href="/login">Log In</a></li>
+                <li class="mx-3 hover:text-gray-500"><a href="/register">Register</a></li>
+                {{/if}}
             </ul>
         </div>
     </nav>
