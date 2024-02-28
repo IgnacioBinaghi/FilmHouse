@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Film</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #131c28;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen text-white">
+    <h1 class="text-4xl font-bold mb-8">Confirm Your Film</h1>
+    <iframe class="w-full md:w-2/3 xl:w-1/2 h-96 mb-8" src="https://www.youtube.com/embed/{{filmLink}}?si=75_1hpuIvAefkLVF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <div class="flex space-x-4">
+        <a href="/uploadFilm" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+            Go Back
+        </a>
+        <a href="/uploadFilmData/{{filmLink}}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+            Confirm
+        </a>
+    </div>
+</body>
+</html>

@@ -9,52 +9,22 @@
 <body class="font-mono text-white" style="background-color: #131c28;">
     <nav class="p-4">
         <div class="container mx-auto flex justify-between">
-            <div class="font-semibold text-lg"><a href="/">FilmHaus</a></div>
+            <div class="font-semibold text-lg"><a href="/" class="text-white">FilmHaus</a></div>
             <ul class="flex">
-                <li class="mx-3 text-white hover:text-gray-500"><a href="/logout">Log Out</a></li>
-                <li class="mx-3 hover:text-gray-500"><a href="/myProfile">My Profile</a></li>
+                <li class="mx-3 hover:text-gray-400"><a href="/logout">Log Out</a></li>
+                <li class="mx-3 hover:text-gray-400"><a href="/myProfile">My Profile</a></li>
             </ul>
         </div>
     </nav>
-    <div class="flex justify-center p-5">
-        <div class="flex justify-center items-center h-screen"> <!-- Full viewport height and centering -->
-    <div id="filmContainer" class="hidden">
-        <iframe id="filmFrame" class="w-full" style="width: 1120px; height: 630px;" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <h1 class="text-4xl text-black mb-4">Upload Film</h1>
+            <h2 class="text-lg text-black mb-4">Enter Youtube Link To Upload</h2>
+            <form action="/confirmFilm" method="POST">
+                <input type="text" name="filmLink" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Film Link">
+                <input type="submit" value="Upload" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded cursor-pointer">
+            </form>
+        </div>
     </div>
-</div>
-
-        <form action="" method="post" class="p-5 rounded-lg shadow-lg flex flex-col gap-3 w-full max-w-xs">
-            <input required type="link" name="filmLink" placeholder="Film Link" id="filmLink" class="p-2 text-black rounded border border-gray-600">
-            <button type="button" id="confirmFilm" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded border border-blue-700">Add Video</button>
-            <div id="additionalFields" class="hidden flex flex-col gap-3 text-black">
-                <input required type="text" name="filmName" placeholder="Film Name" class="p-2 rounded border border-gray-600">
-                <input type="text" name="bio" placeholder="Bio" class="p-2 rounded border border-gray-600">
-                <input type="number" name="budget" placeholder="Budget" class="p-2 rounded border border-gray-600">
-                <input type="text" name="totalTimeSpent" placeholder="Total Time Spent" class="p-2 rounded border border-gray-600">
-                <input type="text" name="numberOfPeopleInvolved" placeholder="Number of People Involved" class="p-2 rounded border border-gray-600">
-                <input type="text" name="director" placeholder="Director" class="p-2 rounded border border-gray-600">
-                <input type="text" name="productionDesigner" placeholder="Production Designer" class="p-2 rounded border border-gray-600">
-                <input type="text" name="dp" placeholder="DP/Cinematography - Director" class="p-2 rounded border border-gray-600">
-                <input type="text" name="soundDesigner" placeholder="Sound Designer" class="p-2 rounded border border-gray-600">
-                <input type="text" name="costumeDesigner" placeholder="Costume Designer" class="p-2 rounded border border-gray-600">
-                <input type="text" name="editorialDepartment" placeholder="Editorial Department" class="p-2 rounded border border-gray-600">
-                <input type="text" name="actors" placeholder="Actors" class="p-2 rounded border border-gray-600">
-                <input type="text" name="equipmentUsed" placeholder="Equipment Used" class="p-2 rounded border border-gray-600">
-                <input type="file" name="optionalDocuments" class="p-2 rounded border border-gray-600">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded border border-blue-600">Upload</button>
-            </div>
-        </form>
-    </div>
-
-    <script>
-        document.getElementById('confirmFilm').addEventListener('click', function() {
-            var filmLink = document.getElementById('filmLink').value;
-            if(filmLink) {
-                document.getElementById('additionalFields').classList.remove('hidden');
-                document.getElementById('filmContainer').classList.remove('hidden');
-                document.getElementById('filmFrame').src = "https://www.youtube.com/embed/"+filmLink.slice(32,)+"?si=75_1hpuIvAefkLVF";
-            }
-        });
-    </script>
 </body>
 </html>

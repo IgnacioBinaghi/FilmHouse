@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Film</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="font-mono text-white" style="background-color: #131c28;">
+    <form action="/uploadFilm" method="POST" class="max-w-64 mx-auto p-8">
+        <!-- hidden input to store the film link -->
+        <input type="hidden" name="filmLink" value="{{filmLink}}">
+        <div>
+            <h1 class="text-2xl mb-4">Basic Film Info (we can fix later kiran)</h1>
+            <input type="text" name="filmName" placeholder="Film Name" required class="w-full mb-4 p-2 rounded bg-white text-black">
+            <input type="text" name="filmDescription" placeholder="Bio" class="w-full mb-4 p-2 rounded bg-white text-black">
+            <input type="text" name="totalTimeSpent" placeholder="Time Spent" class="w-full mb-4 p-2 rounded bg-white text-black">
+        </div>
+        <div id="people">
+            <h1 class="text-2xl mb-4">People Involved</h1>
+            <div id="contributor">
+                <select name="contributorType[]" class="mb-4 p-2 rounded bg-white text-black">
+                    <option value="director">Director</option>
+                    <option value="actor">Actor</option>
+                    <option value="producer">Producer</option>
+                    <option value="writer">Writer</option>
+                    <option value="other">Other</option>
+                </select>
+                <input type="text" name="contributorName[]" class="mb-4 p-2 rounded bg-white text-black" required>
+            </div>
+        </div>
+        <div><button id="add-more" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Add More</button></div>
+        <input type="submit" value="Upload Film" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-5 cursor-pointer">
+    </form>
+
+    <script>
+        const addMore = document.querySelector("#add-more");
+        const peopleDiv = document.querySelector("#people");
+
+        function createDeleteButton() {
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.className = 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded ml-2';
+            deleteButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.target.parentElement.remove();
+            });
+            return deleteButton;
+        }
+
+        addMore.addEventListener("click", function (e) {
+            e.preventDefault();
+            let originalContributor = document.querySelector("#contributor");
+            let newContributor = originalContributor.cloneNode(true);
+            let selectElement = newContributor.querySelector('select');
+            selectElement.addEventListener('change', handleSelectChange);
+            newContributor.querySelector('input[type="text"]').value = ''; // Reset the value of the cloned input
+            newContributor.appendChild(createDeleteButton()); // Append delete button
+            peopleDiv.appendChild(newContributor);
+        });
+
+        function handleSelectChange(e) {
+            if (e.target.value === 'other') {
+                let input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'contributorOther[]';
+                input.className = 'mb-4 p-2 rounded bg-white text-black mr-2';
+                input.placeholder = 'Specify Role';
+
+                let parentDiv = e.target.parentElement;
+                parentDiv.insertBefore(input, parentDiv.children[1]); // Insert before the name input field
+            }
+        }
+
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', handleSelectChange);
+        });
+    </script>
+</body>
+</html>

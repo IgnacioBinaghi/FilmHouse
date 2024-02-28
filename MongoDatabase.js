@@ -36,12 +36,12 @@ async function getFilms() {
   return films;
 }
 
-async function addFilmToDB(user, filmLink, filmName, bio, totalTimeSpent, numberOfPeopleInvolved, director, productionDesigner, dp, soundDesigner, costumeDesigner, editorialDepartment, actors, equipmentUsed, optionalDocuments) {
+async function addFilmToDB(user, filmLink, filmName, bio='', totalTimeSpent='', contributors) {
   const client = connectToDatabase();
   const database = client.db('userData');
   const filmData = database.collection('filmData');
 
-  let currFilmData = { user, votes: 0, voters: {}, filmLink, filmName, bio, totalTimeSpent, numberOfPeopleInvolved, director, productionDesigner, dp, soundDesigner, costumeDesigner, editorialDepartment, actors, equipmentUsed, optionalDocuments, comments: [] }
+  let currFilmData = { user, votes: 0, voters: {}, filmLink, filmName, bio, totalTimeSpent, contributors, comments: [] }
   await filmData.insertOne(currFilmData);
   await client.close();
 }

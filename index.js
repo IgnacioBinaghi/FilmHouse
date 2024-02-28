@@ -17,7 +17,8 @@ const {
     addProfileView
 } = require('./MongoDatabase'); // Assuming you've renamed MongoDatabase.mjs to MongoDatabase.js
 
-const { sendEmail } = require('./sendEmail')
+const { sendEmail } = require('./sendEmail');
+const e = require('express');
 
 const app = express();
 app.set('view engine', 'hbs');
@@ -111,15 +112,20 @@ app.get('/', async (req, res) => {
         res.redirect('/login');
     } else { // If the user is logged in, show the home page
         let allFilms = await getFilms()
-        const allFilmsFiltered = allFilms.map(film => {
+        let constributors = [];
+        const allFilmsFiltered = allFilms.map(film => { // filtering film object to make sure only items in film with data are displayed, with the exception of comments
             return Object.fromEntries(Object.entries(film).filter(([key, value]) => {
                 if (key === 'comments') {
+                    return true;
+                }
+                else if (key === 'contributors') {
+                    constributors = value;
                     return true;
                 }
                 return value !== '';
             }));
         });
-        res.render('dashboard', { films: allFilmsFiltered , user: req.session.username});
+        res.render('dashboard', { films: allFilmsFiltered, user: req.session.username, contributors: constributors});
     }
 });
 
@@ -198,7 +204,7 @@ app.get('/myProfile', async (req, res) => {
 app.post('/deleteFilm/:filmName', async (req, res) => {
     const filmName = req.params.filmName;
     await deleteFilm(req.session.username, filmName);
-    res.redirect('/'); // Redirect back to the profile page after deletion
+    res.redirect('/myProfile'); // Redirect back to the profile page after deletion
 });
 
 
@@ -210,9 +216,46 @@ app.get('/uploadFilm', (req, res) => {
     }
 })
 
+function extractVideoID(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+
+    return (match && match[2].length == 11) ? match[2] : null;
+}
+
+app.post('/confirmFilm', (req, res) => {
+    const filmLink = req.body.filmLink;
+    const slicedLink = extractVideoID(filmLink);
+
+    res.render('confirmFilm', {filmLink: slicedLink});
+});
+
+app.get('/uploadFilmData/:filmLink', (req, res) => {
+    res.render('uploadFilmData', {filmLink: req.params.filmLink});
+});
+
 app.post('/uploadFilm', (req, res) => {
-    const { filmLink, filmName, bio, totalTimeSpent,  numberOfPeopleInvolved, director, productionDesigner, dp, soundDesigner, costumeDesigner, editorialDepartment, actors, equipmentUsed, optionalDocuments} = req.body;
-    addFilmToDB(req.session.username, filmLink.slice(32, ), filmName, bio, totalTimeSpent,  numberOfPeopleInvolved, director, productionDesigner, dp, soundDesigner, costumeDesigner, editorialDepartment, actors, equipmentUsed, optionalDocuments);
+    let filmLink = req.body.filmLink;
+    let filmName = req.body.filmName;
+    let filmDescription = req.body.filmDescription;
+    let contributorType = req.body.contributorType;
+    let contributorName = req.body.contributorName;
+    let totalTimeSpent = req.body.totalTimeSpent;
+    let contributorOther = req.body.contributorOther;
+
+
+    const contributors = []; // { contributorType: contributorName }
+    let currIndex = 0;
+    contributorType.map((curr, index) => { // map contributorType to contributorName
+        if (curr === 'other') {
+            contributors.push({contributorType: contributorOther[currIndex], contributorName: contributorName[index]});
+            currIndex++;
+            return;
+        }
+        return contributors.push({contributorType: curr, contributorName:contributorName[index]});
+    });
+
+    addFilmToDB(req.session.username, filmLink, filmName, filmDescription, totalTimeSpent, contributors);
     res.redirect('/');
 });
 

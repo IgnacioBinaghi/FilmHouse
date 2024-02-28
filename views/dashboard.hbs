@@ -12,8 +12,8 @@
             <div class="font-semibold text-lg"><a href="/">FilmHaus</a></div>
             <ul class="flex">
                 <li class="mx-3 text-white hover:text-gray-500"><a href="/uploadFilm">Upload Film</a></li>
-                <li class="mx-3 text-white hover:text-gray-500"><a href="/logout">Log Out</a></li>
                 <li class="mx-3 hover:text-gray-500"><a href="/myProfile">My Profile</a></li>
+                <li class="mx-3 text-white hover:text-gray-500"><a href="/logout">Log Out</a></li>
             </ul>
         </div>
     </nav>
@@ -23,50 +23,20 @@
                 <div class="p-4">
                     <h1>Posted by <a class="hover:text-gray-400" href="/user/{{film.user}}">{{film.user}}</a></h1>
                     <h2 class="text-xl font-bold mb-2 hover:text-gray-400"><a href="/film/{{film.filmName}}">{{film.filmName}}</a></h2>
-                    <div class="flex items-center space-x-4">
-                        <a href="/vote/{{film.filmName}}/up" class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300">
-                            Upvote
+                    <div class="flex items-center space-x-4 mb-10">
+                        <a href="/vote/{{film.filmName}}/up" class="px-1 py-1 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300">
+                            ↑
                         </a>
                         <h1 class="text-xl font-bold">{{film.votes}}</h1>
-                        <a href="/vote/{{film.filmName}}/down" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-300">
-                            Downvote
+                        <a href="/vote/{{film.filmName}}/down" class="px-1 py-1 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-300">
+                            ↓
                         </a>
                     </div>
                     <iframe class="w-full h-64" src="https://www.youtube.com/embed/{{film.filmLink}}?si=75_1hpuIvAefkLVF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     <div class="mt-4 mb-5">
-                        {{#if film.bio}}
-                        <p><strong>Bio:</strong> {{film.bio}}</p>
-                        {{/if}}
-                        {{#if film.totalTimeSpent}}
-                        <p><strong>Total Time Spent:</strong> {{film.totalTimeSpent}}</p>
-                        {{/if}}
-                        {{#if film.numberOfPeopleInvolved}}
-                        <p><strong>Number of People Involved:</strong> {{film.numberOfPeopleInvolved}}</p>
-                        {{/if}}
-                        {{#if film.director}}
-                        <p><strong>Director:</strong> {{film.director}}</p>
-                        {{/if}}
-                        {{#if film.productionDesigner}}
-                        <p><strong>Production Designer:</strong> {{film.productionDesigner}}</p>
-                        {{/if}}
-                        {{#if film.dp}}
-                        <p><strong>Director of Photography:</strong> {{film.dp}}</p>
-                        {{/if}}
-                        {{#if film.soundDesigner}}
-                        <p><strong>Sound Designer:</strong> {{film.soundDesigner}}</p>
-                        {{/if}}
-                        {{#if film.costumeDesigner}}
-                        <p><strong>Costume Designer:</strong> {{film.costumeDesigner}}</p>
-                        {{/if}}
-                        {{#if film.editorialDepartment}}
-                        <p><strong>Editorial Department:</strong> {{film.editorialDepartment}}</p>
-                        {{/if}}
-                        {{#if film.actors}}
-                        <p><strong>Actors:</strong> {{film.actors}}</p>
-                        {{/if}}
-                        {{#if film.equipmentUsed}}
-                        <p><strong>Equipment Used:</strong> {{film.equipmentUsed}}</p>
-                        {{/if}}
+                        {{#each contributors as |contributor|}}
+                            <p><strong>{{contributor.contributorType}}:</strong> {{contributor.contributorName}}</p>
+                        {{/each}}
                     </div>
                     {{#each comments as |comment|}}
                         <div class="bg-gray-700 rounded-lg p-4 mb-4" data-comment-id="{{comment._id}}">
