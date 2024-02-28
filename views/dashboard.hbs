@@ -33,9 +33,10 @@
                         </a>
                     </div>
                     <iframe class="w-full h-64" src="https://www.youtube.com/embed/{{film.filmLink}}?si=75_1hpuIvAefkLVF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <p class="mt-5 text-lg font-medium"><strong>About - </strong>{{bio}}</p>
                     <div class="mt-4 mb-5">
                         {{#each contributors as |contributor|}}
-                            <p><strong>{{contributor.contributorType}}:</strong> {{contributor.contributorName}}</p>
+                            <p><strong>{{contributor.contributorType}} - </strong> {{contributor.contributorName}}</p>
                         {{/each}}
                     </div>
                     {{#each comments as |comment|}}

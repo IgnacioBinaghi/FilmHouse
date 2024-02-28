@@ -21,16 +21,17 @@
         <div class="w-2/3">
         <div class="mb-5 text-lg"><a href="/user/{{film.user}}" class="hover:text-gray-400">By {{film.user}},</a></div>
             <h1 class="text-lg font-bold mb-4">{{film.filmName}}</h1>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4 mb-5">
                 <a href="/vote/{{film.filmName}}/up" class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300">
-                    Upvote
+                    ↑
                 </a>
                 <h1 class="text-xl font-bold">{{film.votes}}</h1>
                 <a href="/vote/{{film.filmName}}/down" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-300">
-                    Downvote
+                    ↓
                 </a>
             </div>
             <iframe class="w-full h-3/4 mb-4" src="https://www.youtube.com/embed/{{film.filmLink}}?si=75_1hpuIvAefkLVF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <p class="mt-5 text-lg font-medium mb-5"><strong>About - </strong>{{bio}}</p>
             {{#each film.contributors as |contributor|}}
                 <p><strong>{{contributor.contributorType}}:</strong> {{contributor.contributorName}}</p>
             {{/each}}

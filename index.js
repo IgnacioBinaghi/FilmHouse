@@ -113,9 +113,14 @@ app.get('/', async (req, res) => {
     } else { // If the user is logged in, show the home page
         let allFilms = await getFilms()
         let constributors = [];
+        let bio = '';
         const allFilmsFiltered = allFilms.map(film => { // filtering film object to make sure only items in film with data are displayed, with the exception of comments
             return Object.fromEntries(Object.entries(film).filter(([key, value]) => {
                 if (key === 'comments') {
+                    return true;
+                }
+                else if (key === 'bio') {
+                    bio = value;
                     return true;
                 }
                 else if (key === 'contributors') {
@@ -125,7 +130,7 @@ app.get('/', async (req, res) => {
                 return value !== '';
             }));
         });
-        res.render('dashboard', { films: allFilmsFiltered, user: req.session.username, contributors: constributors});
+        res.render('dashboard', { films: allFilmsFiltered, user: req.session.username, contributors: constributors, bio: bio});
     }
 });
 
@@ -276,9 +281,17 @@ app.get('/film/:filmName', async (req, res) => {
         if (key === 'comments') {
             return true;
         }
+        else if (key === 'bio') {
+            bio = value;
+            return true;
+        }
+        else if (key === 'contributors') {
+            constributors = value;
+            return true;
+        }
         return value !== '';
     }));
-    res.render('film', { film: filteredFilm, comments: comments});
+    res.render('film', { film: filteredFilm, comments: comments, bio: bio});
 });
 
 app.get('/user/:username', async (req, res) => {
