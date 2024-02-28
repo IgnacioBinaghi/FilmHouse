@@ -18,7 +18,6 @@ const {
 } = require('./MongoDatabase'); // Assuming you've renamed MongoDatabase.mjs to MongoDatabase.js
 
 const { sendEmail } = require('./sendEmail');
-const e = require('express');
 
 const app = express();
 app.set('view engine', 'hbs');
@@ -108,9 +107,6 @@ app.get('/logout', (req, res) => { // GET /logout
 
 
 app.get('/', async (req, res) => {
-    if (!req.session.loggedIn) { // If the user is not logged in, redirect to login
-        res.redirect('/login');
-    } else { // If the user is logged in, show the home page
         let allFilms = await getFilms()
         let constributors = [];
         let bio = '';
@@ -131,7 +127,6 @@ app.get('/', async (req, res) => {
             }));
         });
         res.render('dashboard', { films: allFilmsFiltered, user: req.session.username, contributors: constributors, bio: bio});
-    }
 });
 
 app.get('/vote/:filmName/:voteType', async (req, res) => {
@@ -156,6 +151,10 @@ app.get('/vote/:filmName/:voteType', async (req, res) => {
 });
 
 app.post('/comment/:filmName', (req, res) => {
+    if (!req.session.loggedIn) {
+        res.redirect('/login');
+        return;
+    }
     const filmName = req.params.filmName;
     const comment = req.body.comment;
 
@@ -175,7 +174,10 @@ app.post('/comment/:filmName', (req, res) => {
 });
 
 app.post('/replyComment/:filmName', (req, res) => {
-    console.log(req.body);
+    if (!req.session.loggedIn) {
+        res.redirect('/login');
+        return;
+    }
     const { parentCommentId, reply } = req.body;
     const filmName = req.params.filmName;
 

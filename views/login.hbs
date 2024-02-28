@@ -13,8 +13,18 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center h-screen text-white font-mono" style="background-color: #131c28;">
-    <div class="p-6 rounded-lg shadow-lg border-sm border-white">
+
+<body style="overflow: hidden; font-family: monospace; background-color: #131c28;" class="text-white">
+    <nav class="p-4">
+        <div class="container mx-auto flex justify-between">
+            <div class="font-semibold text-lg"><a href="/">FilmHouse</a></div>
+            <ul class="flex">
+            </ul>
+        </div>
+    </nav>
+
+    <div class="flex items-center justify-center h-screen">
+        <div class="p-6 rounded-lg shadow-lg border-sm border-white">
         <form action="" method="POST">
             <div class="mb-4">
                 <input type="text" name="username" placeholder="Username" class="w-full py-2 px-3 mb-3 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-white text-white">
@@ -28,6 +38,7 @@
         {{#if error}}
             <p class="text-red-500">{{error}}</p>
         {{/if}}
+    </div>
     </div>
 </body>
 </html>
