@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const session = require("express-session");
 const bodyParser = require("body-parser");
+const { sendEmail } = require("./sendEmail");
 const bcrypt = require("bcryptjs");
 const {
   addUserToDatabase,
@@ -16,9 +17,9 @@ const {
   deleteComment,
   changeVotes,
   addProfileView,
-} = require("./MongoDatabase"); // Assuming you've renamed MongoDatabase.mjs to MongoDatabase.js
-
-const { sendEmail } = require("./sendEmail");
+} = require("./MongoDatabase");
+require('dotenv').config();
+const mongoose = require('mongoose');
 
 const app = express();
 app.set("view engine", "hbs");
@@ -34,6 +35,8 @@ const sessionOptions = {
 app.use(session(sessionOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+mongoose.connect(process.env.DSN)
 
 app.get("/register", (req, res) => {
   // GET /register
@@ -150,21 +153,8 @@ app.get("/", async (req, res) => {
 
 app.get("/vote/:filmName/:voteType", async (req, res) => {
   const filmName = req.params.filmName;
-  const film = await getFilmByName(filmName);
 
-  if (req.params.voteType === "up") {
-    await changeVotes(filmName, "up", req.session.username);
-  } else {
-    await changeVotes(filmName, "down", req.session.username);
-  }
-
-  if (req.headers.referer) {
-    const referer = req.headers.referer.split("/");
-    if (referer[3] === "film") {
-      res.redirect(`/film/${filmName}`);
-      return;
-    }
-  }
+  await changeVotes(filmName, req.params.voteType, req.session.username);
   res.redirect("/");
 });
 
@@ -253,7 +243,6 @@ function extractVideoID(url) {
   const regExp =
     /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#\&\?]*).*/;
   const match = url.match(regExp);
-
   return match && match[2].length == 11 ? match[2] : null;
 }
 
@@ -268,7 +257,7 @@ app.get("/uploadFilmData/:filmLink", (req, res) => {
   res.render("uploadFilmData", { filmLink: req.params.filmLink });
 });
 
-app.post("/uploadFilm", (req, res) => {
+app.post("/uploadFilm", async (req, res) => {
   let filmLink = req.body.filmLink;
   let filmName = req.body.filmName;
   let filmDescription = req.body.filmDescription;
@@ -295,7 +284,8 @@ app.post("/uploadFilm", (req, res) => {
     });
   });
 
-  addFilmToDB(
+
+  await addFilmToDB(
     req.session.username,
     filmLink,
     filmName,
