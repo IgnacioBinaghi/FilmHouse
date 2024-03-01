@@ -1,259 +1,131 @@
-const { MongoClient } = require("mongodb");
-const { ObjectId } = require("mongodb");
-const { KEYS } = require("../KEYS");
+//const { KEYS } = require("../KEYS");
+const mongoose = require('mongoose');
+require('dotenv').config();
 
-function connectToDatabase() {
-  const uri = KEYS.mongoConnString;
-  const client = new MongoClient(uri);
-  return client;
-}
+const userSchema = new mongoose.Schema({
+  username: String,
+  email: String,
+  password: String,
+  userData: {
+    type: Object,
+    required: true
+  },
+  friends: {
+    type: Object,
+    required: true
+  },
+  profileViews: Number
+}, { collection: 'users' });
+
+const filmSchema = new mongoose.Schema({
+  user: String,
+  votes: Number,
+  voters: {
+    type: Object,
+    required: true
+  }, // fix why voters is not being saved when added
+  filmLink: String,
+  filmName: String,
+  bio: String,
+  totalTimeSpent: String,
+  contributors: { type: [Object], default: [] }, // Default to an empty array
+  comments: { type: [Object], default: [] } // Default to an empty array
+}, { collection: 'filmData' });
+
+mongoose.connect(process.env.DSN).then(() => console.log('Successfully Connected to Database')).catch(err => console.log('Error: ', err));
+const User = mongoose.model('User', userSchema);
+const Film = mongoose.model('Film', filmSchema);
+
 
 async function addUserToDatabase(email, username, password) {
-  const client = connectToDatabase();
-  const database = client.db("userData");
-  const users = database.collection("users");
-
-  await users.insertOne({
-    username: username,
-    email: email,
-    password: password,
-    userData: {},
-    friends: {},
-    profileViews: 0,
-  });
-  await client.close();
+  const user = new User({ username, email, password, userData: {}, friends: {}, profileViews: 0 });
+  await user.save();
 }
 
 async function getUserData(username) {
-  const client = connectToDatabase();
-  const database = client.db("userData");
-  const users = database.collection("users");
-
-  const user = await users.findOne({ username });
-  await client.close();
-  return user;
+  return await User.findOne({ username }).lean();
 }
 
 async function getFilms() {
-  const client = connectToDatabase();
-  const database = client.db("userData");
-  const filmData = database.collection("filmData");
-
-  const films = await filmData.find({}).toArray();
-  await client.close();
-  return films;
+  return (await Film.find({}).lean());
 }
 
-async function addFilmToDB(
-  user,
-  filmLink,
-  filmName,
-  bio = "",
-  totalTimeSpent = "",
-  contributors
-) {
-  const client = connectToDatabase();
-  const database = client.db("userData");
-  const filmData = database.collection("filmData");
-
-  let currFilmData = {
-    user,
-    votes: 0,
-    voters: {},
-    filmLink,
-    filmName,
-    bio,
-    totalTimeSpent,
-    contributors,
-    comments: [],
-  };
-  await filmData.insertOne(currFilmData);
-  await client.close();
+async function addFilmToDB(user, filmLink, filmName, bio = "", totalTimeSpent = "", contributors) {
+  const film = new Film({ user, votes: 0, voters: new Map(), filmLink, filmName, bio, totalTimeSpent, contributors, comments: [] });
+  await film.save();
 }
 
 async function changeVotes(filmName, vote, user) {
-  const client = connectToDatabase();
-  const database = client.db("userData");
-  const filmData = database.collection("filmData");
+  const film = await Film.findOne({ filmName });
 
-  let currFilm = await filmData.findOne({ filmName });
+  if (!film || !user) return;
 
-  if (user && !currFilm.voters[user]) {
-    currFilm.voters[user] = vote;
-    currFilm.votes++;
-    await filmData.updateOne(
-      { filmName: filmName },
-      { $set: { votes: currFilm.votes, voters: currFilm.voters } }
-    );
-    await client.close();
-    return;
-  } else if (!user) {
-    await client.close();
-    return;
+  const currentVote = film.voters[user];
+  if (currentVote === undefined) {
+    film.voters[user] = vote;
+    film.votes += (vote === 'up') ? 1 : -1;
+  } else if (currentVote !== vote) {
+    film.voters[user] = vote;
+    film.votes += (vote === 'up') ? 2 : -2;
   }
-
-  if (currFilm.voters[user] === vote) {
-    await client.close();
-    return;
-  } else if (currFilm.voters[user] !== vote) {
-    // make it so when someone downvotes they can only change to upvote and vice versa but cant vote twice
-    if (vote === "up" && currFilm.voters[user] === "down") {
-      currFilm.votes += 2;
-    } else if (vote === "down" && currFilm.voters[user] === "up") {
-      currFilm.votes -= 2;
-    }
-  }
-  currFilm.voters[user] = vote;
-  await filmData.updateOne(
-    { filmName: filmName },
-    { $set: { votes: currFilm.votes, voters: currFilm.voters } }
-  );
-  await client.close();
+  film.markModified('voters');
+  await film.save();
 }
 
-async function getFilmByName(filmName) {
-  const client = connectToDatabase();
-  const database = client.db("userData");
-  const filmData = database.collection("filmData");
 
-  const film = await filmData.findOne({ filmName });
-  await client.close();
-  return film;
+async function getFilmByName(filmName) {
+  return await Film.findOne({ filmName }).lean();
 }
 
 async function getFilmsByUsername(username) {
-  const client = connectToDatabase();
-  const database = client.db("userData");
-  const filmData = database.collection("filmData");
-
-  const films = await filmData.find({ user: username }).toArray();
-  await client.close();
-  return films;
+  return await Film.find({ user: username }).lean();
 }
 
 async function deleteFilm(username, filmName) {
-  const client = connectToDatabase();
-  const database = client.db("userData");
-  const filmData = database.collection("filmData");
-
-  await filmData.deleteOne({ user: username, filmName: filmName });
-  await client.close();
+  await Film.deleteOne({ user: username, filmName });
 }
 
-async function updateComments(
-  filmName,
-  comment,
-  username,
-  parentCommentId = null
-) {
-  const client = await connectToDatabase();
-  const database = client.db("userData");
-  const filmData = database.collection("filmData");
+async function updateComments(filmName, comment, username, parentCommentId = null) {
+  const film = await Film.findOne({ filmName });
+  if (!film) return;
 
-  const currentDate = new Date();
-  const dateString = currentDate.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-  const timeString = currentDate.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-  const timestamp = dateString + " " + timeString;
+  const newComment = {
+    text: comment,
+    postedBy: username,
+    commentedAt: new Date().toISOString()
+  };
 
   if (parentCommentId) {
-    // It's a reply to an existing comment
-    let currFilm = await filmData.findOne({ filmName: filmName });
-    let currComment = currFilm.comments.find(
-      (comment) => comment._id == parentCommentId
-    );
-
-    await filmData.updateOne(
-      { filmName: filmName, "comments._id": new ObjectId(parentCommentId) },
-      {
-        $push: {
-          "comments.$.replies": {
-            _id: new ObjectId(),
-            text: comment,
-            postedBy: username,
-            repliedAt: timestamp,
-            replies: [],
-          },
-        },
-      }
-    );
+    const parentComment = film.comments.id(parentCommentId);
+    if (parentComment) {
+      parentComment.replies.push(newComment);
+    }
   } else {
-    // It's a new parent comment
-    await filmData.updateOne(
-      { filmName: filmName },
-      {
-        $push: {
-          comments: {
-            _id: new ObjectId(),
-            text: comment,
-            postedBy: username,
-            commentedAt: timestamp,
-            replies: [],
-          },
-        },
-      }
-    );
+    film.comments.push(newComment);
   }
-  await client.close();
+
+  await film.save();
 }
 
 async function getComments(filmName, skip = 0, limit = 10) {
-  const client = await connectToDatabase();
-  const database = client.db("userData");
-  const filmData = database.collection("filmData");
-
-  const film = await filmData.findOne(
-    { filmName },
-    { projection: { comments: { $slice: [skip, limit] } } }
-  );
-  await client.close();
-  return film.comments;
+  const film = await Film.findOne({ filmName }, 'comments').lean().skip(skip).limit(limit);
+  return film ? film.comments : [];
 }
 
 async function deleteComment(filmName, commentId) {
-  const client = await connectToDatabase();
-  const database = client.db("userData");
-  const filmData = database.collection("filmData");
-
-  await filmData.updateOne(
-    { filmName: filmName },
-    { $pull: { comments: { _id: new ObjectId(commentId) } } }
+  await Film.updateOne(
+    { filmName },
+    { $pull: { comments: { _id: commentId } } }
   );
-  await client.close();
 }
 
-async function addProfileView(user) {
-  const client = await connectToDatabase();
-  const database = client.db("userData");
-  const users = database.collection("users");
-
-  //let newProfileViews = getUserData(user).profileViews++;
-  let userViews = (await getUserData(user)).profileViews;
-
-  let newProfileViews = userViews + 1;
-
-  await users.updateOne({ username: user }, { $inc: { profileViews: 1 } });
-  await client.close();
+async function addProfileView(username) {
+  await User.updateOne({ username }, { $inc: { profileViews: 1 } });
 }
 
 async function checkIfUser(username) {
-  const client = connectToDatabase();
-  const database = client.db("userData");
-  const users = database.collection("users");
-
-  let user = await users.findOne({ username }); // account
-
-  if (user) {
-    return true;
-  }
-  return false;
+  const user = await User.findOne({ username }).lean();
+  return !!user;
 }
 
 module.exports = {
@@ -269,4 +141,5 @@ module.exports = {
   deleteComment,
   changeVotes,
   addProfileView,
+  checkIfUser
 };
