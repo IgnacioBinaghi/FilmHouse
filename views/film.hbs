@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{film.title}}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
+
 <body class="text-white font-mono" style="background-color: #131c28;">
     <nav class="p-4">
         <div class="container mx-auto flex justify-between">
@@ -24,51 +26,64 @@
     </nav>
     <div class="flex justify-center">
         <div class="w-2/3">
-        <div class="mb-5 text-lg"><a href="/user/{{film.user}}" class="hover:text-gray-400">By {{film.user}},</a></div>
+            <div class="mb-5 text-lg"><a href="/user/{{film.user}}" class="hover:text-gray-400">By {{film.user}},</a>
+            </div>
             <h1 class="text-lg font-bold mb-4">{{film.filmName}}</h1>
             <div class="flex items-center space-x-4 mb-5">
-                <a href="/vote/{{film.filmName}}/up" class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300">
+                <a href="/vote/{{film.filmName}}/up"
+                    class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300">
                     ↑
                 </a>
                 <h1 class="text-xl font-bold">{{film.votes}}</h1>
-                <a href="/vote/{{film.filmName}}/down" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-300">
+                <a href="/vote/{{film.filmName}}/down"
+                    class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-300">
                     ↓
                 </a>
             </div>
-            <iframe class="w-full h-3/4 mb-4" src="https://www.youtube.com/embed/{{film.filmLink}}?si=75_1hpuIvAefkLVF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <iframe class="w-full h-3/4 mb-4" src="https://www.youtube.com/embed/{{film.filmLink}}?si=75_1hpuIvAefkLVF"
+                title="YouTube video player" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
             <p class="mt-5 text-lg font-medium mb-5"><strong>About - </strong>{{bio}}</p>
             {{#each film.contributors as |contributor|}}
-                <p><strong>{{contributor.contributorType}}:</strong> {{contributor.contributorName}}</p>
+            <p><strong>{{contributor.contributorType}}:</strong> {{contributor.contributorName}}</p>
             {{/each}}
-            <div class="mt-10 mb-10"><a href="/user/{{film.user}}" class="hover:text-gray-400">More about {{film.user}}</a></div>
+            <div class="mt-10 mb-10"><a href="/user/{{film.user}}" class="hover:text-gray-400">More about
+                    {{film.user}}</a></div>
             {{#each comments as |comment|}}
-                        <div class="bg-gray-700 rounded-lg p-4 mb-4" data-comment-id="{{comment._id}}">
-                            <div class="flex justify-between items-center">
-                                <h3 class="font-bold text-white">{{comment.postedBy}}</h3>
-                                <h3 class="text-white">{{comment.commentedAt}}</h3>
-                            <button type="button" onclick="setupReplyForm('{{comment._id}}')" class="text-sm text-gray-300 hover:text-gray-400">Reply</button>
-                            </div>
-                            <p class="text-gray-200 mt-2">{{comment.text}}</p>
-                            {{#each comment.replies as |reply|}}
-                                <div class="reply ml-4 bg-gray-700 rounded-lg p-4 mb-4">
-                                    <div class="flex justify-between items-center">
-                                        <h3 class="font-bold text-white">{{reply.postedBy}}</h3>
-                                        <h3 class="text-white">{{reply.repliedAt}}</h3>
-                                    </div>
-                                    <p class="text-gray-200 mt-2">{{reply.text}}</p>
-                                </div>
-                            {{/each}}
-                            <form id="reply-form-{{comment._id}}" class="reply-form mt-5" style="display:none;" action="/replyComment/{{film.filmName}}" method="POST">
-                                <input type="hidden" name="parentCommentId" value="{{comment._id}}">
-                                <input type="text" name="reply" class="py-2 px-3 mb-3 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-white text-white">
-                                <input type="submit" value="Reply" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                            </form>
-                        </div>
-                    {{/each}}
-                    <form class="ml-5" id = "commentForm" action="/comment/{{film.filmName}}" method="POST">
-                    <input type="text" name="comment" placeholder="Comment" class="py-2 px-3 mb-3 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-white text-white">
-                    <input type="submit" value="Add Comment" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            <div class="bg-gray-700 rounded-lg p-4 mb-4" data-comment-id="{{comment._id}}">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-white">{{comment.postedBy}}</h3>
+                    <h3 class="text-white">{{comment.commentedAt}}</h3>
+                    <button type="button" onclick="setupReplyForm('{{comment._id}}')"
+                        class="text-sm text-gray-300 hover:text-gray-400">Reply</button>
+                </div>
+                <p class="text-gray-200 mt-2">{{comment.text}}</p>
+                {{#each comment.replies as |reply|}}
+                <div class="reply ml-4 bg-gray-700 rounded-lg p-4 mb-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-white">{{reply.postedBy}}</h3>
+                        <h3 class="text-white">{{reply.repliedAt}}</h3>
+                    </div>
+                    <p class="text-gray-200 mt-2">{{reply.text}}</p>
+                </div>
+                {{/each}}
+                <form id="reply-form-{{comment._id}}" class="reply-form mt-5" style="display:none;"
+                    action="/replyComment/{{film.filmName}}" method="POST">
+                    <input type="hidden" name="parentCommentId" value="{{comment._id}}">
+                    <input type="text" name="reply"
+                        class="py-2 px-3 mb-3 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-white text-white">
+                    <input type="submit" value="Reply"
+                        class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                 </form>
+            </div>
+            {{/each}}
+            <form class="ml-5" id="commentForm" action="/comment/{{film.filmName}}" method="POST">
+                <input type="text" name="comment" placeholder="Comment"
+                    class="py-2 px-3 mb-3 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-white text-white">
+                <input type="submit" value="Add Comment"
+                    class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            </form>
         </div>
     </div>
     <script>
@@ -83,4 +98,5 @@
         }
     </script>
 </body>
+
 </html>
